@@ -2,3 +2,5 @@ numpy
 datasets
 pandas
 transformers
+scikit-learn
+torch
