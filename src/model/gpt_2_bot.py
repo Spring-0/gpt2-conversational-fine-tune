@@ -7,8 +7,8 @@ class GPT2Agent:
         self.tokenizer = GPT2Tokenizer.from_pretrained(model_path)
         self.device = device
 
-    def generate_response(self, prompt, temperature=0.9):
-        prompt = f"<USER>: {prompt} <BOT>:"
+    def generate_response(self, prompt, temperature=0.7):
+        prompt = f"<USER> {prompt}{self.tokenizer.eos_token}"
         inputs = self.tokenizer(prompt, return_tensors="pt", truncation=True, padding=True).to(self.device)
 
         output = self.model.generate(
@@ -17,11 +17,11 @@ class GPT2Agent:
             eos_token_id=self.tokenizer.eos_token_id,
             do_sample=True,
             temperature=temperature,
-            attention_mask=inputs.attention_mask if "attention_mask" in inputs else None
+            attention_mask=inputs.attention_mask #if "attention_mask" in inputs else None
         )
 
-        decoded = self.tokenizer.decode(output[0], skip_special_tokens=True).strip()
-        return decoded.split("\n")[0].split("<BOT>:")[1]
+        decoded = self.tokenizer.decode(output[0], skip_special_tokens=True)
+        return decoded.split("<BOT>")[1]
 
     def update_model(self, new_model_path):
         self.model = GPT2LMHeadModel.from_pretrained(new_model_path).to(self.device)
